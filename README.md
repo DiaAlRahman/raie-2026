@@ -22,7 +22,7 @@ We run the AI models natively on your computer to ensure we have hardware/GPU ac
 
 ### Step 2: Download the Data
 
-Our scraped JSON data and populated ChromaDB vector database are too large for GitHub. 
+Our scraped JSON data and populated ChromaDB vector database are too large for GitHub.
 
 1. Go to our team [One Drive Link Here].
 2. Download the `data.zip` and `chroma_db.zip` files.
@@ -46,4 +46,5 @@ Now that your models and data are ready, let's boot up the code.
 5. **Output**: The results are printed in the terminal.
 
 ## Notes
+
 "In-crisis" is a term we use to describe individuals who may be at risk of self-harm and may require immediate attention.
