@@ -4,6 +4,12 @@ Welcome to the Beyond Blue Risk-Aware Extraction project. This repository contai
 
 ## Getting Started (Read This First) (Hypothetical Steps - Subject to Change)
 
+### Step 0: Prerequisites
+
+- uncomment relvant lines in .gitignore (CRUCIAL STEP - ensures you don't accidentally push large files to GitHub)
+- always always always make sure to create and switch to a new brach before making changes to the codebase.
+  - 'git switch -c yourname-feature-description' (e.g. 'git switch -c alice-add-web-scraper')
+
 ### Step 1: Install the AI Engine (Host Machine)
 
 We run the AI models natively on your computer to ensure we have hardware/GPU acceleration. **Do not run these commands inside the Docker container.**
