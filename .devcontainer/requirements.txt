@@ -1,0 +1,9 @@
+# Vector Database
+chromadb
+
+# Local LLM Engine communication
+ollama
+
+# Data manipulation and API requests (for the scraper)
+requests
+pandas
