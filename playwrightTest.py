@@ -6,6 +6,8 @@ import time
 import os
 
 BASE_URL = "https://forums.beyondblue.org.au"
+
+# paste board link
 START_BOARD_URL = "https://forums.beyondblue.org.au/t5/grief-and-loss/bd-p/c1-sc4-b4"
 
 # =========================
