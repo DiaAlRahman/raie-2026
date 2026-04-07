@@ -7,3 +7,8 @@ ollama
 # Data manipulation and API requests (for the scraper)
 requests
 pandas
+
+# Web scraping
+playwright
+beautifulsoup4
+lxml
