@@ -139,12 +139,12 @@ def main():
 
                 visited_thread_links.add(link)
 
-                post_text = scrape_post(page, link)
-
-                if post_text:
+                raw_post_text = scrape_post(page, link)
+                sanitised_post_text = raw_post_text.replace("\n", "")
+                if raw_post_text:
                     all_data.append({
                         "post_id": post_counter,
-                        "post": post_text
+                        "post": sanitised_post_text
                     })
                     post_counter += 1
 
@@ -162,6 +162,7 @@ def main():
     # Create data/raw directory if it does not exist
     try:
         os.makedirs("data/raw")
+        os.chmod("data/raw", 0o777)
         print(f"Directory 'data/raw' created successfully.")
     except FileExistsError:
         print(f"Directory 'data/raw' already exists.")
