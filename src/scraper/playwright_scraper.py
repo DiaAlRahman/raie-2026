@@ -6,7 +6,7 @@ import time
 import os
 
 BASE_URL = "https://forums.beyondblue.org.au"
-START_BOARD_URL = "https://forums.beyondblue.org.au/t5/suicidal-thoughts-and-self-harm/bd-p/c1-sc2-b4" # link of the start page
+START_BOARD_URL = "https://forums.beyondblue.org.au/t5/suicidal-thoughts-and-self-harm/bd-p/c1-sc2-b4/page/5" # link of the start page
 
 
 
@@ -159,8 +159,18 @@ def main():
         return
 
     df = pd.DataFrame(all_data)
-
-    full_path = os.path.abspath(OUTPUT_FILE)
+    # Create data/raw directory if it does not exist
+    try:
+        os.makedirs("data/raw")
+        print(f"Directory 'data/raw' created successfully.")
+    except FileExistsError:
+        print(f"Directory 'data/raw' already exists.")
+    except PermissionError:
+        print(f"Permission denied: Unable to create directory 'data/raw'.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    output_path = "data/raw/" + OUTPUT_FILE
+    full_path = os.path.abspath(output_path)
     df.to_csv(full_path, index=False, encoding="utf-8")
 
     print(f"\nTotal posts collected: {len(all_data)}")
