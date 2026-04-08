@@ -6,23 +6,29 @@ import time
 import os
 
 BASE_URL = "https://forums.beyondblue.org.au"
-START_BOARD_URL = "https://forums.beyondblue.org.au/t5/anxiety/bd-p/c1-sc2-b1/page/5" # link of the start page
+START_BOARD_URL = "https://forums.beyondblue.org.au/t5/suicidal-thoughts-and-self-harm/bd-p/c1-sc2-b4" # link of the start page
+
+
 
 # =========================
 # SETTINGS
 # =========================
 
-MAX_BOARD_PAGES = 5
+MAX_BOARD_PAGES = 2
 MAX_THREADS_PER_PAGE = None  # None = all posts in the page
 DELAY_BETWEEN_THREADS = 2
 
-OUTPUT_FILE = "anxiety_posts.csv" # output file name
+OUTPUT_FILE = "beyondblue_posts.csv" # output file name
+
+# To run scraper in dev container, do 
+# xvfb-run -a python3 src/scraper/playwright_scraper.py 
 
 # =========================
 # HELPER FUNCTIONS
 # =========================
 
 def get_thread_links_from_board(page):
+
     html = page.content()
     soup = BeautifulSoup(html, "lxml")
 
@@ -55,7 +61,7 @@ def scrape_post(page, url):
     open one thread page and extract ONLY the first post
     """
     print(f"\nScraping thread: {url}")
-
+    page.screenshot(path="out.png")
     page.goto(url, wait_until="domcontentloaded", timeout=60000)
 
     try:
