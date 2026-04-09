@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 import time
+import os
 
 # Target URL for the forum category
 base_urls = [
@@ -64,5 +65,19 @@ def scrape_to_csv(base_url, start_page, num_posts, output_file):
     print(f"Success! Data saved to {output_file}")
 
 if __name__ == "__main__":
+    
+    # Create /data/raw directory if doesn't already exist
+    try:
+        os.makedirs("data/raw")
+        os.chmod("data/raw", 0o777)
+        print(f"Directory 'data/raw' created successfully.")
+    except FileExistsError:
+        pass
+    except PermissionError:
+        print(f"Permission denied: Unable to create directory 'data/raw'.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    raie_path = os.path.abspath("data/raw/")
     for base_url in base_urls:
-        scrape_to_csv(base_url, start_page=5, num_posts=10, output_file=f"/workspaces/ProjectRaie/data/raw/beyondblue_{base_url.split('/')[4]}_posts.csv")
+        scrape_to_csv(base_url, start_page=5, num_posts=10, output_file=f"{raie_path}/beyondblue_{base_url.split('/')[4]}_posts.csv")
