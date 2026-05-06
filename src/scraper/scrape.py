@@ -21,13 +21,13 @@ def scrape_to_csv(base_url, start_page, num_posts, output_file):
     post_id = 1
     
     # delete existing file if it exists to avoid appending to old data
-    with open(output_file, mode='a', newline='', encoding='utf-8') as file:
+    with open(output_file, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow(["post_id", "post"])
         
         while post_id <= num_posts:
             url = f"{base_url}/page/{current_page}"
-            print(f"Scraping Page: {current_page} Topic: ...")
+            print(f"Scraping Page: {current_page} Topic: {base_url.split('/')[4]}")
             try:
                 response = requests.get(url, headers=headers, timeout=10)
 
@@ -50,6 +50,9 @@ def scrape_to_csv(base_url, start_page, num_posts, output_file):
                 for art in articles:
                     content = art.get_text(strip=True)
                     if content:
+                        content = content.replace('\n', ' ').replace('\r', '')
+                        content = " ".join(content.split())
+                        
                         writer.writerow([post_id, content])
                         post_id += 1
                 
@@ -65,4 +68,4 @@ def scrape_to_csv(base_url, start_page, num_posts, output_file):
 
 if __name__ == "__main__":
     for base_url in base_urls:
-        scrape_to_csv(base_url, start_page=5, num_posts=10, output_file=f"/workspaces/ProjectRaie/data/raw/beyondblue_{base_url.split('/')[4]}_posts.csv")
+        scrape_to_csv(base_url, start_page=5, num_posts=250, output_file=f"/workspaces/ProjectRaie/data/raw/beyondblue_{base_url.split('/')[4]}_posts.csv")
