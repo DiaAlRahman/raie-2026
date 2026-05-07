@@ -123,7 +123,7 @@ def build_database():
     print(f"Successful embeddings: {total_successful}")
     print(f"Failed embeddings: {total_failed}")
 
-def chunk_text(text, max_chars=1500, overlap=50):
+def chunk_text(text, max_chars=1500, overlap=200):
     """Splits text into overlapping chunks by characters to strictly prevent memory crashes."""
     # If the text is short enough, just return it as one piece
     if len(text) <= max_chars:
