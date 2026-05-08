@@ -33,7 +33,9 @@ def test_database():
 
     # --- PROOF 2: IS IT GOOD ENOUGH? ---
     # Let's test it with a mock crisis post
-    test_post = "I am feeling completely overwhelmed and hopeless. I can't sleep and I just want the pain to stop."
+    # test_post = "I am feeling completely overwhelmed and hopeless. I can't sleep and I just want the pain to stop."
+    # test_post = 'I am happy! I will never kill myself. I have a great support system and I am grateful for my life.'
+    test_post = """I will kill myself tonight. It's the only way out. I can't take this pain anymore. No one understands me and I feel so alone. It's insanity. I am depressed and anxious and all i can think about is how i have no friends no girlfriend no life. always sad and moping, overeating and rewatching the same shows again and again. i can't get out of my head at all."""
     
     print(f"🔍 Searching for similar posts to: '{test_post}'")
     print("=" * 60)
