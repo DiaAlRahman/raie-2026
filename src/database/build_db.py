@@ -1,3 +1,5 @@
+# run ollama serve & ollama pull mxbai-embed-large before executing this script
+
 import os
 import glob
 import csv
