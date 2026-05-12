@@ -36,6 +36,8 @@ def build_database():
         metadata={"hnsw:space": "cosine"} # Cosine similarity is best practice for text embeddings
     )
 
+    files_processed = []
+    
     # 3. Read and Process CSV Files
     csv_files = glob.glob(os.path.join(DATA_DIR, "*.csv"))
 
@@ -119,11 +121,13 @@ def build_database():
                     else:
                         print(f"    ⚠️ Skipped {batch_ids[0]}: Unexpected error - {e}")
 
-        print(f"Finished adding {file_name}")
+        files_processed.append(file_name)
 
     print("\nDatabase build complete! Embeddings are stored in /chroma_db")
     print(f"Successful embeddings: {total_successful}")
     print(f"Failed embeddings: {total_failed}")
+    files_processed = '\n  - '.join(files_processed)
+    print(f"Files processed:\n  - {files_processed}")
 
 def chunk_text(text, max_chars=1500, overlap=200):
     """Splits text into overlapping chunks by characters to strictly prevent memory crashes."""
