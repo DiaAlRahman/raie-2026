@@ -24,6 +24,7 @@ import os
 from pathlib import Path
 
 import chromadb
+import httpx
 import pandas as pd
 from chromadb.utils.embedding_functions.ollama_embedding_function import (
     OllamaEmbeddingFunction,
@@ -38,15 +39,24 @@ EMBEDDING_MODEL = "mxbai-embed-large"
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 OLLAMA_URL = f"{OLLAMA_HOST.rstrip('/')}/api/embeddings"
 
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 MAX_CHARS_FOR_EMBEDDING = 1800
+OLLAMA_TIMEOUT = 120.0
 
 METADATA_FIELDS: tuple[str, ...] = ("post", "in_crisis", "explanation")
 
 
+class OllamaEmbeddingFunctionWithTimeout(OllamaEmbeddingFunction):
+    """OllamaEmbeddingFunction with a configurable httpx timeout."""
+
+    def __init__(self, url, model_name, timeout=OLLAMA_TIMEOUT):
+        super().__init__(url=url, model_name=model_name)
+        self._session = httpx.Client(timeout=timeout)
+
+
 def init_collection():
     client = chromadb.PersistentClient(path=DB_PATH)
-    embedding_fn = OllamaEmbeddingFunction(
+    embedding_fn = OllamaEmbeddingFunctionWithTimeout(
         url=OLLAMA_URL,
         model_name=EMBEDDING_MODEL,
     )
