@@ -2,11 +2,10 @@
 # data/
 # data/*
 
-# # Ignore the vector database
-# chroma_db/
-# chroma_db/*
+# Ignore the vector database
+chroma_db/
 
-# # Ignore Python environment junk
-# __pycache__/
-# *.pyc
-# .env
+# Ignore Python environment junk
+__pycache__/
+*.pyc
+.env
