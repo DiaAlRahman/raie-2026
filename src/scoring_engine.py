@@ -1,82 +1,110 @@
+import json
+
+
 CATEGORY_A = {
     "suicidal_ideation": 1.0,
     "selfharm_mention": 1.0,
     "indirect_suicidal_ideation": 0.8,
-    "danger_to_others": 0.8,
+    "danger_to_others": 0.8
 }
 
 CATEGORY_B = {
     "worthlessness_expressed": 0.55,
     "helplessness_expressed": 0.55,
-    "hopelessness_expressed": 0.55,
+    "hopelessness_expressed": 0.55
 }
 
 CATEGORY_C = {
     "self_isolation": 0.1,
     "previous_conditions": 0.1,
-    "previous_suicidality": 0.1,
+    "previous_suicidality": 0.1
 }
 
-def calculate_risk_score(flags):
+
+ALL_CATEGORIES = {
+    **CATEGORY_A,
+    **CATEGORY_B,
+    **CATEGORY_C
+}
+
+
+def parse_llm_output(llm_output):
+    if isinstance(llm_output, dict):
+        return llm_output
+
+    if isinstance(llm_output, str):
+        try:
+            return json.loads(llm_output)
+        except json.JSONDecodeError:
+            raise ValueError("LLM output is not valid JSON")
+
+    raise TypeError("LLM output must be a JSON string or dictionary")
+
+
+def clean_llm_output(data):
+    cleaned = {}
+
+    for field in ALL_CATEGORIES:
+        cleaned[field] = bool(data.get(field, False))
+
+    return cleaned
+
+
+def count_true(data, category):
+    return sum(1 for field in category if data.get(field, False))
+
+
+def calculate_score(data):
     score = 0
 
-    a_count = sum(flags.get(switch) is True for switch in CATEGORY_A)
-    b_count = sum(flags.get(switch) is True for switch in CATEGORY_B)
-    c_count = sum(flags.get(switch) is True for switch in CATEGORY_C)
+    for field, weight in ALL_CATEGORIES.items():
+        if data.get(field, False):
+            score += weight
 
-    for category in [CATEGORY_A, CATEGORY_B, CATEGORY_C]:
-        for switch, weight in category.items():
-            if flags.get(switch) is True:
-                score += weight
+    return min(score, 1.0)
 
-    score = min(score, 1.0)    # Cap score at 1.0
 
-    high_risk = (
-        a_count >= 1 or
-        (b_count >= 2 and c_count == 0) or
-        (b_count >= 1 and c_count >= 2)
+def classify_risk(llm_output):
+    data = parse_llm_output(llm_output)
+    cleaned = clean_llm_output(data)
+
+    a_count = count_true(cleaned, CATEGORY_A)
+    b_count = count_true(cleaned, CATEGORY_B)
+    c_count = count_true(cleaned, CATEGORY_C)
+
+    score = calculate_score(cleaned)
+
+    high_risk_rule_triggered = (
+        a_count >= 1
+        or (b_count >= 2 and c_count == 0)
+        or (b_count >= 1 and c_count >= 2)
     )
 
-    if high_risk:
+    if high_risk_rule_triggered:
         score = max(score, 0.75)
+        severity = "high"
+        human_review_required = True
 
-    if score >= 0.75:
-        label = "High risk"
+    elif score >= 0.75:
+        severity = "high"
+        human_review_required = True
+
     elif score >= 0.25:
-        label = "Moderate risk"
+        severity = "moderate"
+        human_review_required = False
+
     else:
-        label = "Low risk"
+        severity = "low"
+        human_review_required = False
 
     return {
-        "score": round(score * 100, 2),
-        "label": label,
-        "human_review_required": label == "High risk",
+        "risk_score": round(score, 2),
+        "severity": severity,
+        "human_review_required": human_review_required,
         "category_counts": {
-            "category_a": a_count,
-            "category_b": b_count,
-            "category_c": c_count,
-        }
+            "A": a_count,
+            "B": b_count,
+            "C": c_count
+        },
+        "indicators": cleaned
     }
-
-# =========================
-# TEST CASE
-# =========================
-
-test_flags = {
-    "suicidal_ideation": False,
-    "selfharm_mention": False,
-    "indirect_suicidal_ideation": False,
-    "danger_to_others": False,
-
-    "worthlessness_expressed": True,
-    "helplessness_expressed": True,
-    "hopelessness_expressed": False,
-
-    "self_isolation": False,
-    "previous_conditions": False,
-    "previous_suicidality": False,
-}
-
-result = calculate_risk_score(test_flags)
-
-print(result)
