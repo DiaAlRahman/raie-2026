@@ -47,6 +47,6 @@ client = Client(
 
 )
 def generate_boolswitch_prompt(model: str, prompt: str):
-    print(prompt)
+    #print(prompt)
     response = client.generate(model, prompt, options={"temperature": 0}) 
     return response['response']

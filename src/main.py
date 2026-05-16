@@ -37,9 +37,10 @@ OLLAMA_URL = f"{OLLAMA_HOST.rstrip('/')}/api/embeddings"
 OLLAMA_TIMEOUT = 120.0
 
 MAX_CHARS_FOR_EMBEDDING = 1800
-
+print("start")
 
 def main():
+    print("start")
     query = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else "I feel hopeless and alone"
     with open("src/engine/bool_prompt.txt", "r") as f:
         PROMPT_BOOL = f.read()
@@ -56,7 +57,9 @@ def main():
     APPENDED_PROMPT_BOOL = f"{PROMPT_BOOL}\n{close_results}\nPost to classify: \n{query}"
     print(APPENDED_PROMPT_BOOL)
     print("START OF BOOLSWITCH PROMPT OUTPUT:")
-    print(generate_boolswitch_prompt(LLM_MODEL, APPENDED_PROMPT_BOOL))
+    generated_response = generate_boolswitch_prompt(LLM_MODEL, APPENDED_PROMPT_BOOL)
+    print(generated_response)
+    print(classify_risk(generated_response))
 
 if __name__ == "__main__":
     main()
