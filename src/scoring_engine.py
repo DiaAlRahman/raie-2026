@@ -1,6 +1,5 @@
 import json
 
-
 CATEGORY_A = {
     "suicidal_ideation": 1.0,
     "selfharm_mention": 1.0,
@@ -20,13 +19,11 @@ CATEGORY_C = {
     "previous_suicidality": 0.1
 }
 
-
 ALL_CATEGORIES = {
     **CATEGORY_A,
     **CATEGORY_B,
     **CATEGORY_C
 }
-
 
 def parse_llm_output(llm_output):
     if isinstance(llm_output, dict):
@@ -40,7 +37,6 @@ def parse_llm_output(llm_output):
 
     raise TypeError("LLM output must be a JSON string or dictionary")
 
-
 def clean_llm_output(data):
     cleaned = {}
 
@@ -49,10 +45,8 @@ def clean_llm_output(data):
 
     return cleaned
 
-
 def count_true(data, category):
     return sum(1 for field in category if data.get(field, False))
-
 
 def calculate_score(data):
     score = 0
@@ -62,7 +56,6 @@ def calculate_score(data):
             score += weight
 
     return min(score, 1.0)
-
 
 def classify_risk(llm_output):
     data = parse_llm_output(llm_output)
