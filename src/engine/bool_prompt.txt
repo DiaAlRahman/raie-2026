@@ -21,8 +21,8 @@ previous_suicidality: Mention of a prior history of suicidal ideation or suicide
 Output format:
 {
   "post": "...",
-  "indirect_suicidal_ideation": true/false,
+  "suicidal_ideation": true/false,
   ...
 }
 
-Post to classify:
+For context, here are some similar posts from this post from the database, the posts with the lowest distance score determined by a RAG model:
