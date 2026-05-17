@@ -10,3 +10,4 @@ ollama
 # Data manipulation and API requests (for the scraper)
 requests
 pandas
+beautifulsoup4
