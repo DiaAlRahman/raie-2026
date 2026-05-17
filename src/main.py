@@ -37,6 +37,7 @@ OLLAMA_URL = f"{OLLAMA_HOST.rstrip('/')}/api/embeddings"
 OLLAMA_TIMEOUT = 120.0
 
 MAX_CHARS_FOR_EMBEDDING = 1800
+IS_VERBOSE = True
 print("start")
 
 def main():
@@ -46,40 +47,37 @@ def main():
         PROMPT_BOOL = f.read()
     with open("src/engine/explaination_prompt.txt", "r") as f:
         PROMPT_EXPLAIN = f.read()
-    
-    #print(PROMPT_BOOL)
-    #print(PROMPT_EXPLAIN)
     close_results = query_database(query)
     print(f"Query: {query!r}\n")
-    for i, r in enumerate(close_results, 1):
-        label = "CRISIS" if r["in_crisis"] else "no crisis"
-        print(f"#{i}  distance={r['distance']}  [{label}]  id={r['id']}")
-        print(f"    Post: {r['post'][:120]}...")
-        print(f"    Why:  {r['explanation'][:100]}...")
-        print()
-    #print(close_results)
     APPENDED_PROMPT_BOOL = f"{PROMPT_BOOL}\n{close_results}\nPost to classify: \n{query}"
-    #print(APPENDED_PROMPT_BOOL)
-    #rint("START OF BOOLSWITCH PROMPT OUTPUT:")
     generated_bool_response = generate_output(LLM_MODEL, APPENDED_PROMPT_BOOL, options={"temperature": 0})
-    #print(generated_bool_response)
     classified_risk = classify_risk(generated_bool_response)
-    #print(classified_risk)
-    # I would just need query, classify_risk(generated response), and then close_results, and it could go off that
     APPENDED_PROMPT_EXPLAIN = f"{PROMPT_EXPLAIN}\n\nPost to explain: {query}\n\nScoring dict: {classified_risk}\n\nSimilar posts: {close_results}"
-    #print("START OF APPENDED PROMPT EXPLAIN")
-    #print(APPENDED_PROMPT_EXPLAIN)
     generated_explain_response = generate_output(LLM_MODEL, APPENDED_PROMPT_EXPLAIN, options={"temperature": 0.5})
     print("START OF GENERATED RESPONSE: ")
     print(f"Risk score: {classified_risk['risk_score']}")
-    print(f"severity: {classified_risk['severity']}")
-    print(f"explaination: {generated_explain_response}")
-    if(classified_risk['human_review_required'] is True):
-        review_choice = input("High risk - human review required (options: confirm, override [<moderate, or low>], dismiss): ")
+    print(f"Severity: {classified_risk['severity']}")
+    print(f"Explaination: {generated_explain_response}")
     best_match = min(close_results, key=lambda r: r['distance'])
     print(f"Lowest distance score found is: {best_match['distance']}")
     similarity_score = 1 - best_match['distance']
     confidence = (classified_risk['risk_score'] * 0.7) + (similarity_score * 0.3)
     print(f"Final confidence score is: {confidence}")
+    if(classified_risk['human_review_required'] is True):
+        review_choice = input("High risk - human review required (options: confirm, override [<moderate, or low>], dismiss): ")
+    if IS_VERBOSE is True:
+        print("VERBOSE OUTPUT: \n")
+        print(f"SIMILAR POSTS: \n")
+        for i, r in enumerate(close_results, 1):
+            label = "CRISIS" if r["in_crisis"] else "no crisis"
+            print(f"#{i}  distance={r['distance']}  [{label}]  id={r['id']}")
+            print(f"    Post: {r['post'][:120]}...")
+            print(f"    Why:  {r['explanation'][:100]}...")
+            print()
+        print()
+        print("GENERATED BOOLEAN SWITCHES: ")
+        print(f"{generated_bool_response}\n")
+
+
 if __name__ == "__main__":
     main()
