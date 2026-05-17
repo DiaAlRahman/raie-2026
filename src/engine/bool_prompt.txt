@@ -8,7 +8,6 @@ The following post has been written by a forum user and requires classification.
 
 suicidal_ideation: Direct expression of current suicidal thoughts or intent to end one's life
 selfharm_mention: Direct mention of current self-harm or language suggesting imminent danger to oneself such as farewell messaging
-indirect_suicidal_ideation: Language that implies suicidal ideation without explicit statement, such as expressions of wanting to disappear or not wanting to exist
 danger_to_others: Language indicating the user may pose a risk of harm to another person
 worthlessness_expressed: Excessive self-blame, guilt, shame, or feeling like a burden to others
 helplessness_expressed: Expressing that effort is futile and nothing the user does will produce a positive outcome

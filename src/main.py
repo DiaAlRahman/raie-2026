@@ -71,7 +71,15 @@ def main():
     print(APPENDED_PROMPT_EXPLAIN)
     generated_explain_response = generate_output(LLM_MODEL, APPENDED_PROMPT_EXPLAIN, options={"temperature": 0.5})
     print("START OF GENERATED EXPLAIN RESPONSE: ")
-    print(generated_explain_response)
-
+    print(f"Risk score: {classified_risk['risk_score']}")
+    print(f"severity: {classified_risk['severity']}")
+    print(f"explaination: {generated_explain_response}")
+    if(classified_risk['human_review_required'] is True):
+        review_choice = input("High risk - human review required (options: confirm, override [<moderate, or low>], dismiss): ")
+    best_match = min(close_results, key=lambda r: r['distance'])
+    print(f"Lowest distance score found is: {best_match['distance']}")
+    similarity_score = 1 - best_match['distance']
+    confidence = (classified_risk['risk_score'] * 0.7) + (similarity_score * 0.3)
+    print(f"Final confidence score is: {confidence}")
 if __name__ == "__main__":
     main()

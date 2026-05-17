@@ -3,7 +3,7 @@ import json
 CATEGORY_A = {
     "suicidal_ideation": 1.0,
     "selfharm_mention": 1.0,
-    "indirect_suicidal_ideation": 0.8,
+    #"indirect_suicidal_ideation": 0.8,
     "danger_to_others": 0.8
 }
 
