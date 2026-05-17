@@ -46,7 +46,7 @@ client = Client(
     host=OLLAMA_HOST,
 
 )
-def generate_boolswitch_prompt(model: str, prompt: str):
+def generate_output(model: str, prompt: str, options: dict = {"temperature": 0}):
     #print(prompt)
-    response = client.generate(model, prompt, options={"temperature": 0}) 
+    response = client.generate(model, prompt, options=options) 
     return response['response']
