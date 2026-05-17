@@ -3,14 +3,14 @@ import json
 CATEGORY_A = {
     "suicidal_ideation": 1.0,
     "selfharm_mention": 1.0,
-    "indirect_suicidal_ideation": 0.8,
+    #"indirect_suicidal_ideation": 0.8,
     "danger_to_others": 0.8
 }
 
 CATEGORY_B = {
-    "worthlessness_expressed": 0.55,
-    "helplessness_expressed": 0.55,
-    "hopelessness_expressed": 0.55
+    "worthlessness_expressed": 0.3,
+    "helplessness_expressed": 0.3,
+    "hopelessness_expressed": 0.3
 }
 
 CATEGORY_C = {
@@ -69,7 +69,7 @@ def classify_risk(llm_output):
 
     high_risk_rule_triggered = (
         a_count >= 1
-        or (b_count >= 2 and c_count == 0)
+        or (b_count >= 2 and c_count == 1)
         or (b_count >= 1 and c_count >= 2)
     )
 
