@@ -1,6 +1,9 @@
 # Vector Database
 chromadb
 
+# HTTP client (used directly by embedding functions)
+httpx
+
 # Local LLM Engine communication
 ollama
 
