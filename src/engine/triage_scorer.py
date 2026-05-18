@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
-from typing import TypedDict
 
 # ==========================================
 # 1. PATH RESOLUTION (CRITICAL FOR IMPORTS)
@@ -24,7 +23,7 @@ if str(SRC_DIR) not in sys.path:
 # ==========================================
 
 from database.query_db import query_database
-from engine.scoring_engine import classify_risk
+import engine.scoring_engine as scoring_engine
 from engine.prompts import generate_output
 
 
@@ -40,51 +39,57 @@ OLLAMA_URL = f"{OLLAMA_HOST.rstrip('/')}/api/embeddings"
 OLLAMA_TIMEOUT = 120.0
 
 MAX_CHARS_FOR_EMBEDDING = 1800
-IS_VERBOSE = True
 
 
 # ==========================================
 # 4. MAIN PIPELINE LOGIC
 # ==========================================
-def run_pipeline(query: str):
+def run_pipeline(query: str, is_verbose: bool = False):
     """Executes the triage scoring pipeline on a given query string."""
     
     # Use dynamic absolute paths so the script doesn't break if run from outside the root folder
     with open(CURRENT_DIR / "bool_prompt.txt", "r") as f:
         PROMPT_BOOL = f.read()
-    with open(CURRENT_DIR / "explaination_prompt.txt", "r") as f:
+    with open(CURRENT_DIR / "explanation_prompt.txt", "r") as f:
         PROMPT_EXPLAIN = f.read()
 
     close_results = query_database(query)
-    print(f"Query: {query!r}\n")
+    # print(f"Query: {query!r}\n")
 
     print("1/2: Generating boolean classification...")
     APPENDED_PROMPT_BOOL = f"{PROMPT_BOOL}\nPost to classify: \n{query}"
     generated_bool_response = generate_output(LLM_MODEL, APPENDED_PROMPT_BOOL, options={"temperature": 0})
-    classified_risk = classify_risk(generated_bool_response)
-    print('1/2: Completed boolean classification')
+    risk_profile = scoring_engine.generate_profile(generated_bool_response)
+    # print('1/2: Completed boolean classification')
 
-    print("\n2/2: Generating risk explanation...")
-    APPENDED_PROMPT_EXPLAIN = f"{PROMPT_EXPLAIN}\n\nPost to explain: {query}\n\nScoring dict: {classified_risk}\n\nSimilar posts: {close_results}"
+    print("2/2: Generating risk profile...")
+    APPENDED_PROMPT_EXPLAIN = f"{PROMPT_EXPLAIN}\n\nPost to explain: {query}\n\nRisk profile: {risk_profile}\n\nSimilar posts: {close_results}"
     generated_explain_response = generate_output(LLM_MODEL, APPENDED_PROMPT_EXPLAIN, options={"temperature": 0.5})
-    print('2/2: Completed risk explanation')
+    # print('2/2: Completed risk profile')
     
     print("\nSTART OF GENERATED RESPONSE: ")
-    print(f"Risk score: {classified_risk['risk_score']:.2f}")
-    print(f"Severity: {classified_risk['severity']}")
+    print(f"Query: {query!r}")
     print(f"Explanation: {generated_explain_response}")
     
     best_match = min(close_results, key=lambda r: r['distance'])
     similarity_score = 1 - best_match['distance']
-    confidence_score = (0.7 * classified_risk['initial_confidence_score']) + (0.3 * similarity_score)
+    confidence_score = (0.7 * risk_profile['initial_confidence_score']) + (0.3 * similarity_score)
     
-    print(f"Confidence score is: {confidence_score:.2f}")
+    print(f"\nConfidence score: {confidence_score*100:.2f}%")
+    print(f"Risk score: {risk_profile['risk_score']*100:.2f}%")
+    print(f"Severity: {risk_profile['severity']}")
     
-    if classified_risk['human_review_required']:
-        review_choice = input("High risk - human review required (options: confirm, override [<moderate, or low>], dismiss): ")
+    print("\nFINAL VERDICT: ", end="")
+    if risk_profile['in_crisis']:
+        print("DANGER - IN CRISIS")
+    else:
+        print("SAFE - NOT IN CRISIS")
+    
+    
+    if risk_profile['human_review_required']:
+        review_choice = input("\nHigh risk - human review required (options: (c)onfirm, to override enter <(m)oderate/(l)ow>): ")
         
-    if IS_VERBOSE:
-        print("VERBOSE OUTPUT: \n")
+    if is_verbose:
         print("SIMILAR POSTS: \n")
         for i, r in enumerate(close_results, 1):
             label = "IN CRISIS" if r["in_crisis"] else "NOT IN CRISIS"

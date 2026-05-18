@@ -19,11 +19,11 @@ def parse_llm_output(llm_output):
     raise TypeError("LLM output must be a JSON string or dictionary")
 
 def clean_llm_output(data):
-    cleaned = {}
+    cleaned_output = {}
     for field in WEIGHTS.keys():
         # Ensure it safely defaults to False if the LLM missed it
-        cleaned[field] = bool(data.get(field, False))
-    return cleaned
+        cleaned_output[field] = bool(data.get(field, False))
+    return cleaned_output
 
 def calculate_score(data):
     score = 0
@@ -32,15 +32,15 @@ def calculate_score(data):
             score += weight
     return min(score, 1)
 
-def classify_risk(llm_output):
+def generate_profile(llm_output):
     data = parse_llm_output(llm_output)
-    cleaned = clean_llm_output(data)
+    cleaned_output = clean_llm_output(data)
     
-    score = calculate_score(cleaned)
+    score = calculate_score(cleaned_output)
 
     # If they are taking crisis action, instantly flag high risk
     in_crisis = False
-    if cleaned["crisis_action"]:
+    if cleaned_output["crisis_action"]:
         score = max(score, 0.8)
         severity = "high"
         human_review_required = True
@@ -65,6 +65,7 @@ def classify_risk(llm_output):
         "risk_score": round(score, 2),
         "severity": severity,
         "human_review_required": human_review_required,
-        "indicators": cleaned,
+        "in_crisis": in_crisis,
+        "indicators": cleaned_output,
         "initial_confidence_score": initial_confidence_score
     }
