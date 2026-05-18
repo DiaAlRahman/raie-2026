@@ -75,10 +75,10 @@ def run_pipeline(query: str):
     print(f"Explanation: {generated_explain_response}")
     
     best_match = min(close_results, key=lambda r: r['distance'])
-    print(f"Lowest distance score found is: {best_match['distance']:.2f}")
     similarity_score = 1 - best_match['distance']
-    confidence = (classified_risk['risk_score'] * 0.7) + (similarity_score * 0.3)
-    print(f"Final confidence score is: {confidence:.2f}")
+    confidence_score = (0.7 * classified_risk['initial_confidence_score']) + (0.3 * similarity_score)
+    
+    print(f"Confidence score is: {confidence_score:.2f}")
     
     if classified_risk['human_review_required']:
         review_choice = input("High risk - human review required (options: confirm, override [<moderate, or low>], dismiss): ")

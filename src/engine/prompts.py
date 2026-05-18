@@ -22,9 +22,6 @@ OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 OLLAMA_URL = f"{OLLAMA_HOST.rstrip('/')}/api/embeddings"
 OLLAMA_TIMEOUT = 120.0
 
-with open("src/engine/bool_prompt.txt", "r") as f:
-    PROMPT_BOOL = f.read()
-
 client = Client(
     host=OLLAMA_HOST,
 )
