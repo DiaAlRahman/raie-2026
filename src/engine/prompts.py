@@ -47,6 +47,16 @@ client = Client(
 
 )
 def generate_output(model: str, prompt: str, options: dict = {"temperature": 0}):
-    #print(prompt)
-    response = client.generate(model, prompt, options=options) 
-    return response['response']
+    # Tell the client to stream the response
+    response_stream = client.generate(model, prompt, options=options, stream=True) 
+    
+    full_response = ""
+    
+    for chunk in response_stream:
+        text_chunk = chunk['response']
+        print(text_chunk, end='', flush=True)
+        full_response += text_chunk
+        
+    print()
+    
+    return full_response

@@ -31,7 +31,7 @@ DB_PATH = str(REPO_ROOT / "chroma_db")
 COLLECTION_NAME = "beyondblue_posts"
 EMBEDDING_MODEL = "mxbai-embed-large"
 LLM_MODEL = "mistral"
-OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+OLLAMA_HOST = os.environ.get("OLLAMA_HOST")
 OLLAMA_URL = f"{OLLAMA_HOST.rstrip('/')}/api/embeddings"
 OLLAMA_TIMEOUT = 120.0
 
