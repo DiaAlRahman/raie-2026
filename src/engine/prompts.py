@@ -46,17 +46,23 @@ client = Client(
     host=OLLAMA_HOST,
 
 )
+
 def generate_output(model: str, prompt: str, options: dict = {"temperature": 0}):
-    # Tell the client to stream the response
     response_stream = client.generate(model, prompt, options=options, stream=True) 
     
     full_response = ""
+    spinner = ['|', '/', '-', '\\']
+    step = 0
     
     for chunk in response_stream:
         text_chunk = chunk['response']
-        print(text_chunk, end='', flush=True)
         full_response += text_chunk
         
-    print()
+        sys.stdout.write(f"\rThinking... {spinner[step % 4]}")
+        sys.stdout.flush()
+        step += 1
+        
+    sys.stdout.write("\r" + " " * 30 + "\r")
+    sys.stdout.flush()
     
     return full_response
