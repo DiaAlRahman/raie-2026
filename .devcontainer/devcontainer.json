@@ -18,7 +18,7 @@
   // CRITICAL NETWORKING: Tell the Python container how to find the Ollama engine running on the host laptop.
   // 'host.docker.internal' is the magic word that routes traffic out of Docker and into your Mac/Windows host.
   "remoteEnv": {
-    "OLLAMA_HOST": "http://host.docker.internal:11434"
+    "OLLAMA_HOST": "http://localhost:11434"
   },
   
   // Ensure the container has the right permissions to run the file system

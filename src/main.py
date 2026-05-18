@@ -1,6 +1,5 @@
 """
 Driver .py file that implements each stage of the pipeline
-         
 """
 
 
@@ -38,10 +37,9 @@ OLLAMA_TIMEOUT = 120.0
 
 MAX_CHARS_FOR_EMBEDDING = 1800
 IS_VERBOSE = True
-print("start")
+# print("start")
 
 def main():
-    print("start main")
     query = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else "I feel hopeless and alone"
     with open("src/engine/bool_prompt.txt", "r") as f:
         PROMPT_BOOL = f.read()
@@ -57,7 +55,7 @@ def main():
     print("START OF GENERATED RESPONSE: ")
     print(f"Risk score: {classified_risk['risk_score']}")
     print(f"Severity: {classified_risk['severity']}")
-    print(f"Explaination: {generated_explain_response}")
+    print(f"Explanation: {generated_explain_response}")
     best_match = min(close_results, key=lambda r: r['distance'])
     print(f"Lowest distance score found is: {best_match['distance']}")
     similarity_score = 1 - best_match['distance']
