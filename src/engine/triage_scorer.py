@@ -84,11 +84,11 @@ def run_pipeline(query: str, is_verbose: bool = False):
         print("SAFE - NOT IN CRISIS")
     
     
-    if risk_profile['human_review_required']:
+    if risk_profile['human_review_required'] or confidence_score < 0.7:
         review_choice = input("\nHigh risk - human review required (options: (c)onfirm, to override enter <(m)oderate/(l)ow>): ")
         
     if is_verbose:
-        print("SIMILAR POSTS: \n")
+        print("\nSIMILAR POSTS: \n")
         for i, r in enumerate(top_10_results[:3], 1):
             label = "IN CRISIS" if r["in_crisis"] else "NOT IN CRISIS"
             print(f"#{i}  distance={r['distance']:.2f}  [{label}]  id={r['id']}")
