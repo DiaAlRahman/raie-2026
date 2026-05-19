@@ -99,3 +99,12 @@ def run_pipeline(query: str, is_verbose: bool = False):
         print()
         print("GENERATED BOOLEAN SWITCHES: ")
         print(f"{generated_bool_response}\n")
+        
+    return {
+        "in_crisis": risk_profile['in_crisis'],
+        "explanation": generated_explain_response,
+        "risk_score": risk_profile['risk_score'],
+        "severity": risk_profile['severity'],
+        "confidence_score": confidence_score,
+        "review_choice": review_choice if risk_profile['human_review_required'] or confidence_score < 0.7 else None
+    }
