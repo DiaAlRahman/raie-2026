@@ -53,7 +53,7 @@ def run_pipeline(query: str, is_verbose: bool = False, ignore_human_review: bool
     with open(CURRENT_DIR / "explanation_prompt.txt", "r") as f:
         PROMPT_EXPLAIN = f.read()
 
-    top_10_results = query_database(query, 10) # Get top 10 similar posts from the database
+    top_results = query_database(query, 10) # Get top 10 similar posts from the database
     # print(f"Query: {query!r}\n")
 
     print("1/2: Generating boolean classification...")
@@ -67,13 +67,13 @@ def run_pipeline(query: str, is_verbose: bool = False, ignore_human_review: bool
     risk_profile = scoring_engine.generate_profile(generated_bool_response)
     # print('1/2: Completed boolean classification')
     
-    confidence_score = scoring_engine.calculate_final_confidence_score(risk_profile, top_10_results)
+    confidence_score = scoring_engine.calculate_final_confidence_score(risk_profile, top_results)
     risk_profile["confidence_score"] = confidence_score
-    if confidence_score < 0.9:
+    if risk_profile["confidence_score"] < 0.9:
         risk_profile["human_review_required"] = True
 
     print("2/2: Generating risk profile...")
-    APPENDED_PROMPT_EXPLAIN = f"{PROMPT_EXPLAIN}\n\nPost to explain: {query}\n\nRisk profile: {risk_profile}\n\nSimilar posts: {top_10_results[:3]}"
+    APPENDED_PROMPT_EXPLAIN = f"{PROMPT_EXPLAIN}\n\nPost to explain: {query}\n\nRisk profile: {risk_profile}\n\nSimilar posts: {top_results[:3]}"
     options_explain = {
         "temperature": 0.5,
         "num_predict": 1024,
@@ -84,10 +84,10 @@ def run_pipeline(query: str, is_verbose: bool = False, ignore_human_review: bool
     
     print("\nSTART OF GENERATED RESPONSE: ")
     print(f"Query: {query!r}")
-    print(f"Explanation: {generated_explain_response}")
+    print(f"\nExplanation: {generated_explain_response}")
     
-    print(f"\nConfidence score: {confidence_score*100:.2f}%")
-    print(f"Risk score: {risk_profile['risk_score']*100:.2f}%")
+    print(f"\nConfidence score: {risk_profile['confidence_score']*100:.1f}%")
+    print(f"Risk score: {risk_profile['risk_score']*100:.1f}%")
     print(f"Severity: {risk_profile['severity']}")
     
     print("\nFINAL VERDICT: ", end="")
@@ -98,12 +98,12 @@ def run_pipeline(query: str, is_verbose: bool = False, ignore_human_review: bool
     
     
     review_choice = None
-    if (risk_profile['human_review_required'] or confidence_score < 0.9) and not ignore_human_review:
+    if risk_profile['human_review_required'] and not ignore_human_review:
         review_choice = input("""\nHigh risk - human review required (options: (c)onfirm, to override enter <(m)oderate/(l)ow>, (d)issmiss) 
                               enter 'c' to confirm high risk, 'm' to override to moderate, 'l' to override to low, or 'd' to dismiss as safe: """).strip().lower()
     if is_verbose:
         print("\nSIMILAR POSTS: \n")
-        for i, r in enumerate(top_10_results[:3], 1):
+        for i, r in enumerate(top_results[:3], 1):
             label = "IN CRISIS" if r["in_crisis"] else "NOT IN CRISIS"
             print(f"#{i}  distance={r['distance']:.2f}  [{label}]  id={r['id']}")
             print(f"    Post: {r['post'][:120]}...")
