@@ -99,8 +99,41 @@ def run_pipeline(query: str, is_verbose: bool = False, ignore_human_review: bool
     
     review_choice = None
     if risk_profile['human_review_required'] and not ignore_human_review:
-        review_choice = input("""\nHigh risk - human review required (options: (c)onfirm, to override enter <(m)oderate/(l)ow>, (d)issmiss) 
-                              enter 'c' to confirm high risk, 'm' to override to moderate, 'l' to override to low, or 'd' to dismiss as safe: """).strip().lower()
+        print("""
+High risk - human review required (options: (c)onfirm, to override enter <(h)igh/(m)oderate/(l)ow>, (d)issmiss)
+Please note that override will change the following risk profile values:
+    - in_crisis: will be set to True for 'h', False for 'm', 'l', and 'd'
+    - risk_score: will be set to 1.0 for 'h', capped at 0.5 for 'm', 0.2 for 'l', and 0.0 for 'd'
+    - severity: will be set to 'high' for 'h', 'moderate' for 'm' and 'low' for 'l' and 'd'""")
+        while True:
+            review_choice = input("""Enter 'c' to confirm high risk, 'h' to override to high, 'm' to override to moderate, 'l' to override to low, or 'd' to dismiss as safe: """).strip().lower()
+            if review_choice == 'c':
+                review_choice = "confirmed_high"
+            elif review_choice == 'h':
+                review_choice = "override_high"
+                risk_profile['in_crisis'] = True
+                risk_profile['risk_score'] = max(risk_profile['risk_score'], 1.0)
+                risk_profile['severity'] = "high"
+            elif review_choice == 'm':
+                review_choice = "override_moderate"
+                risk_profile['in_crisis'] = False
+                risk_profile['risk_score'] = min(risk_profile['risk_score'], 0.5)
+                risk_profile['severity'] = "moderate"
+            elif review_choice == 'l':
+                review_choice = "override_low"
+                risk_profile['in_crisis'] = False
+                risk_profile['risk_score'] = min(risk_profile['risk_score'], 0.2)
+                risk_profile['severity'] = "low"
+            elif review_choice == 'd':
+                review_choice = "override_dismiss"
+                risk_profile['in_crisis'] = False
+                risk_profile['risk_score'] = 0.0
+                risk_profile['severity'] = "low"
+            else:
+                print("Invalid choice, no changes made to risk profile.")
+                continue
+            break
+            
     if is_verbose:
         print("\nSIMILAR POSTS: \n")
         for i, r in enumerate(top_results[:3], 1):
