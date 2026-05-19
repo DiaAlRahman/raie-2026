@@ -66,6 +66,11 @@ def run_pipeline(query: str, is_verbose: bool = False, ignore_human_review: bool
     generated_bool_response = generate_output(LLM_MODEL, APPENDED_PROMPT_BOOL, options=options_bool)
     risk_profile = scoring_engine.generate_profile(generated_bool_response)
     # print('1/2: Completed boolean classification')
+    
+    confidence_score = scoring_engine.calculate_final_confidence_score(risk_profile, top_10_results)
+    risk_profile["confidence_score"] = confidence_score
+    if confidence_score < 0.9:
+        risk_profile["human_review_required"] = True
 
     print("2/2: Generating risk profile...")
     APPENDED_PROMPT_EXPLAIN = f"{PROMPT_EXPLAIN}\n\nPost to explain: {query}\n\nRisk profile: {risk_profile}\n\nSimilar posts: {top_10_results[:3]}"
@@ -80,8 +85,6 @@ def run_pipeline(query: str, is_verbose: bool = False, ignore_human_review: bool
     print("\nSTART OF GENERATED RESPONSE: ")
     print(f"Query: {query!r}")
     print(f"Explanation: {generated_explain_response}")
-    
-    confidence_score = scoring_engine.calculate_final_confidence_score(risk_profile, top_10_results)
     
     print(f"\nConfidence score: {confidence_score*100:.2f}%")
     print(f"Risk score: {risk_profile['risk_score']*100:.2f}%")

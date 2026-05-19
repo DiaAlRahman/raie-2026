@@ -89,7 +89,7 @@ def generate_profile(llm_output):
         "human_review_required": human_review_required,
         "in_crisis": in_crisis,
         "indicators": cleaned_output,
-        "initial_confidence_score": initial_confidence_score
+        "confidence_score": initial_confidence_score
     }
     
 def calculate_final_confidence_score(risk_profile, top_similar_posts):

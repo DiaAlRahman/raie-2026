@@ -11,7 +11,7 @@ The risk profile contains the following fields:
 - severity: low, moderate, or high
 - human_review_required: whether a human reviewer should assess the post
 - in_crisis: boolean indicating if immediate danger is detected
-- initial_confidence_score: the mathematical confidence of the classification
+- confidence_score: the mathematical confidence of the classification anything below 0.9 needs a human reviewer
 - indicators: the individual boolean flags (crisis_action, severe_distress, social_withdrawal, historical_vulnerability) that were detected in the post
 
 Output a single plain text explanation, no JSON, no bullet points.
