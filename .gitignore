@@ -1,10 +1,10 @@
-# Ignore the massive datasets
-data/
-data/*
+# # Ignore the massive datasets
+# data/
+# data/*
 
-# # Ignore the vector database
-chroma_db/
-chroma_db/*
+# # # Ignore the vector database
+# chroma_db/
+# chroma_db/*
 
 # # Ignore Python environment junk
 __pycache__/
