@@ -85,7 +85,8 @@ def run_pipeline(query: str, is_verbose: bool = False):
     
     
     if risk_profile['human_review_required'] or confidence_score < 0.7:
-        review_choice = input("\nHigh risk - human review required (options: (c)onfirm, to override enter <(m)oderate/(l)ow>): ")
+        review_choice = input("""\nHigh risk - human review required (options: (c)onfirm, to override enter <(m)oderate/(l)ow>, (d)issmiss): 
+                              enter 'c' to confirm high risk, 'm' to override to moderate, 'l' to override to low, or 'd' to dismiss as safe: """).strip().lower()                             )
         
     if is_verbose:
         print("\nSIMILAR POSTS: \n")
