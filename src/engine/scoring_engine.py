@@ -15,6 +15,7 @@ def parse_llm_output(llm_output):
         try:
             return json.loads(llm_output)
         except json.JSONDecodeError:
+            print("Warning: LLM output is not valid JSON. Output was:\n", llm_output)
             raise ValueError("LLM output is not valid JSON")
     raise TypeError("LLM output must be a JSON string or dictionary")
 

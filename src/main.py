@@ -17,10 +17,7 @@ REPO_ROOT = CURRENT_DIR.parent
 OUTPUT_DIR = REPO_ROOT / "outputs"
 OUTPUT_FILE = str(OUTPUT_DIR / "output.csv")
 
-HEADERS = [
-    "post_id", "post", "in_crisis", "explanation", 
-    "risk_score", "severity", "confidence_score", "requires_human_review"
-]
+HEADERS = ["post_id", "post", "in_crisis", "risk_score", "severity", "confidence_score", "human_review_choice", "explanation"]
 
 def init_output_csv():
     """Creates the outputs directory and initializes the CSV with headers (overwrites on each run)."""
@@ -41,10 +38,10 @@ def write_result_to_csv(post_id: str, query: str, result: dict):
             "risk_score": round(result.get("risk_score", 0), 2),
             "severity": result.get("severity"),
             "confidence_score": round(result.get("confidence_score", 0), 4),
-            "requires_human_review": result.get("requires_human_review")
+            "human_review_choice": result.get("human_review_choice"),
         })
 
-def process_csv(filepath: str, is_verbose: bool):
+def process_csv(filepath: str, is_verbose: bool, ignore_human_review: bool):
     """Reads a CSV and runs the pipeline on each post."""
     try:
         with open(filepath, mode='r', encoding='utf-8') as f:
@@ -65,16 +62,16 @@ def process_csv(filepath: str, is_verbose: bool):
                 print(f"\n{'='*50}")
                 print(f"Processing Post #{row_num} from CSV...")
                 print(f"{'='*50}")
-                
-                result = run_pipeline(query, is_verbose=is_verbose)
-                if result:
-                    write_result_to_csv(post_id, query, result)
-                    
+                try:
+                    result = run_pipeline(query, is_verbose=is_verbose, ignore_human_review=ignore_human_review)
+                    if result:
+                        write_result_to_csv(post_id, query, result)
+                except Exception as e:
+                    print(f"Failed on Post #{row_num} (ID: {post_id}): {e}")
+                    print("Skipping to next post...")
+                    continue
     except FileNotFoundError:
         print(f"Error: Could not find the file at '{filepath}'")
-        sys.exit(1)
-    except Exception as e:
-        print(f"An error occurred while processing the CSV: {e}")
         sys.exit(1)
 
 def main():
@@ -91,7 +88,7 @@ def main():
     parser.add_argument(
         "-v", "--verbose", 
         action="store_true", 
-        help="Enable verbose output to see top 3 similar posts from the database."
+        help="Enable verbose output to see top 3 similar posts from the database and LLM boolean output."
     )
     
     parser.add_argument(
@@ -99,21 +96,27 @@ def main():
         type=str, 
         help="Path to a CSV file to process multiple posts automatically."
     )
+    
+    parser.add_argument(
+        "-i", "--ignore", 
+        action="store_true", 
+        help="Ignore human review prompts and process straight into the CSV."
+    )
 
     args = parser.parse_args()
 
     # Routing logic
     if args.file:
         init_output_csv()
-        process_csv(args.file, args.verbose)
-        print(f"\n✅ Processing complete. Results saved to {OUTPUT_FILE}")
+        process_csv(args.file, args.verbose, args.ignore)
+        print(f"\nProcessing complete. Results saved to {OUTPUT_FILE}")
     elif args.query:
         init_output_csv()
         full_query = " ".join(args.query)
-        result = run_pipeline(full_query, is_verbose=args.verbose)
+        result = run_pipeline(full_query, is_verbose=args.verbose, ignore_human_review=args.ignore)
         if result:
             write_result_to_csv("single_cli_query", full_query, result)
-            print(f"\n✅ Processing complete. Result saved to {OUTPUT_FILE}")
+            print(f"\nProcessing complete. Result saved to {OUTPUT_FILE}")
     else:
         parser.print_help()
 

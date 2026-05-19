@@ -44,7 +44,7 @@ MAX_CHARS_FOR_EMBEDDING = 1800
 # ==========================================
 # 4. MAIN PIPELINE LOGIC
 # ==========================================
-def run_pipeline(query: str, is_verbose: bool = False):
+def run_pipeline(query: str, is_verbose: bool = False, ignore_human_review: bool = False) -> dict:
     """Executes the triage scoring pipeline on a given query string."""
     
     # Use dynamic absolute paths so the script doesn't break if run from outside the root folder
@@ -84,10 +84,10 @@ def run_pipeline(query: str, is_verbose: bool = False):
         print("SAFE - NOT IN CRISIS")
     
     
-    if risk_profile['human_review_required'] or confidence_score < 0.7:
-        review_choice = input("""\nHigh risk - human review required (options: (c)onfirm, to override enter <(m)oderate/(l)ow>, (d)issmiss)
+    review_choice = None
+    if (risk_profile['human_review_required'] or confidence_score < 0.7) and not ignore_human_review:
+        review_choice = input("""\nHigh risk - human review required (options: (c)onfirm, to override enter <(m)oderate/(l)ow>, (d)issmiss) 
                               enter 'c' to confirm high risk, 'm' to override to moderate, 'l' to override to low, or 'd' to dismiss as safe: """).strip().lower()
-        
     if is_verbose:
         print("\nSIMILAR POSTS: \n")
         for i, r in enumerate(top_10_results[:3], 1):
@@ -106,5 +106,5 @@ def run_pipeline(query: str, is_verbose: bool = False):
         "risk_score": risk_profile['risk_score'],
         "severity": risk_profile['severity'],
         "confidence_score": confidence_score,
-        "review_choice": review_choice if risk_profile['human_review_required'] or confidence_score < 0.7 else None
+        "review_choice": review_choice
     }
