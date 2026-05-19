@@ -69,3 +69,31 @@ def generate_profile(llm_output):
         "indicators": cleaned_output,
         "initial_confidence_score": initial_confidence_score
     }
+    
+def calculate_final_confidence_score(risk_profile, top_similar_posts):
+    total_weight = 0.0
+    agree_weight = 0.0
+    
+    # 1. Calculate neighborhood agreement
+    for post in top_similar_posts:
+        # Convert distance to similarity (higher is better)
+        similarity = 1.0 - post['distance']
+        total_weight += similarity
+        
+        # If the historical post's crisis label matches the LLM's crisis label, they agree!
+        if post['in_crisis'] == risk_profile['in_crisis']:
+            agree_weight += similarity
+            
+    # Protect against division by zero just in case the database returns nothing
+    if total_weight == 0:
+        neighborhood_agreement = 0.5 
+    else:
+        neighborhood_agreement = agree_weight / total_weight
+        
+    # 2. Blend the LLM's internal certainty with the historical agreement
+    llm_certainty = risk_profile['initial_confidence_score']
+    
+    # Weigh the LLM's logic slightly heavier (70%) than historical precedent (30%)
+    final_confidence = (0.7 * llm_certainty) + (0.3 * neighborhood_agreement)
+    
+    return final_confidence

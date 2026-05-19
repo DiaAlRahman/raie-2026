@@ -53,7 +53,7 @@ def run_pipeline(query: str, is_verbose: bool = False):
     with open(CURRENT_DIR / "explanation_prompt.txt", "r") as f:
         PROMPT_EXPLAIN = f.read()
 
-    close_results = query_database(query)
+    top_10_results = query_database(query, 10) # Get top 10 similar posts from the database
     # print(f"Query: {query!r}\n")
 
     print("1/2: Generating boolean classification...")
@@ -63,7 +63,7 @@ def run_pipeline(query: str, is_verbose: bool = False):
     # print('1/2: Completed boolean classification')
 
     print("2/2: Generating risk profile...")
-    APPENDED_PROMPT_EXPLAIN = f"{PROMPT_EXPLAIN}\n\nPost to explain: {query}\n\nRisk profile: {risk_profile}\n\nSimilar posts: {close_results}"
+    APPENDED_PROMPT_EXPLAIN = f"{PROMPT_EXPLAIN}\n\nPost to explain: {query}\n\nRisk profile: {risk_profile}\n\nSimilar posts: {top_10_results[:3]}"
     generated_explain_response = generate_output(LLM_MODEL, APPENDED_PROMPT_EXPLAIN, options={"temperature": 0.5})
     # print('2/2: Completed risk profile')
     
@@ -71,9 +71,7 @@ def run_pipeline(query: str, is_verbose: bool = False):
     print(f"Query: {query!r}")
     print(f"Explanation: {generated_explain_response}")
     
-    best_match = min(close_results, key=lambda r: r['distance'])
-    similarity_score = 1 - best_match['distance']
-    confidence_score = (0.7 * risk_profile['initial_confidence_score']) + (0.3 * similarity_score)
+    confidence_score = scoring_engine.calculate_final_confidence_score(risk_profile, top_10_results)
     
     print(f"\nConfidence score: {confidence_score*100:.2f}%")
     print(f"Risk score: {risk_profile['risk_score']*100:.2f}%")
@@ -91,7 +89,7 @@ def run_pipeline(query: str, is_verbose: bool = False):
         
     if is_verbose:
         print("SIMILAR POSTS: \n")
-        for i, r in enumerate(close_results, 1):
+        for i, r in enumerate(top_10_results[:3], 1):
             label = "IN CRISIS" if r["in_crisis"] else "NOT IN CRISIS"
             print(f"#{i}  distance={r['distance']:.2f}  [{label}]  id={r['id']}")
             print(f"    Post: {r['post'][:120]}...")
