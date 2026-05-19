@@ -1,4 +1,5 @@
 import json
+import re
 
 
 WEIGHTS = {
@@ -11,12 +12,32 @@ WEIGHTS = {
 def parse_llm_output(llm_output):
     if isinstance(llm_output, dict):
         return llm_output
+        
     if isinstance(llm_output, str):
-        try:
-            return json.loads(llm_output)
-        except json.JSONDecodeError:
-            print("Warning: LLM output is not valid JSON. Output was:\n", llm_output)
-            raise ValueError("LLM output is not valid JSON")
+        # Step 1: Strip out markdown blocks that LLMs love to use
+        cleaned = llm_output.replace('```json', '').replace('```', '').strip()
+        
+        # Step 2: Fix the exact bug you just found! If it forgot to close the dictionary, add the bracket.
+        if cleaned.startswith('{') and not cleaned.endswith('}'):
+            print("\n[DEBUG] AI forgot the closing bracket. Auto-fixing...")
+            cleaned += '\n}'
+        
+        # Step 3: Use regex to find everything between the first { and the last }
+        match = re.search(r'\{.*\}', cleaned, re.DOTALL)
+        
+        if match:
+            extracted_json = match.group(0)
+            try:
+                return json.loads(extracted_json)
+            except json.JSONDecodeError as e:
+                # If it fails for ANY other reason, print exactly what it typed
+                print(f"\n[DEBUG] JSON DECODE ERROR: {e}")
+                print(f"[DEBUG] RAW LLM OUTPUT WAS:\n{llm_output}\n")
+                raise ValueError("LLM output is not valid JSON")
+        else:
+            print(f"\n[DEBUG] NO BRACKETS FOUND IN:\n{llm_output}\n")
+            raise ValueError("No JSON brackets found in output")
+            
     raise TypeError("LLM output must be a JSON string or dictionary")
 
 def clean_llm_output(data):

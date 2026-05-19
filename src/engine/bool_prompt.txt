@@ -13,7 +13,6 @@ historical_vulnerability: Reference to a prior diagnosis or history of mental il
 
 Output format:
 {
-  "post": "...",
   "crisis_action": true/false,
   "severe_distress": true/false,
   "social_withdrawal": true/false,

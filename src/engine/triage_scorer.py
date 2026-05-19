@@ -58,13 +58,23 @@ def run_pipeline(query: str, is_verbose: bool = False, ignore_human_review: bool
 
     print("1/2: Generating boolean classification...")
     APPENDED_PROMPT_BOOL = f"{PROMPT_BOOL}\nPost to classify: \n{query}"
-    generated_bool_response = generate_output(LLM_MODEL, APPENDED_PROMPT_BOOL, options={"temperature": 0})
+    options_bool = {
+        "temperature": 0.0,
+        "num_predict": 512,
+        "num_ctx": 4096
+    }
+    generated_bool_response = generate_output(LLM_MODEL, APPENDED_PROMPT_BOOL, options=options_bool)
     risk_profile = scoring_engine.generate_profile(generated_bool_response)
     # print('1/2: Completed boolean classification')
 
     print("2/2: Generating risk profile...")
     APPENDED_PROMPT_EXPLAIN = f"{PROMPT_EXPLAIN}\n\nPost to explain: {query}\n\nRisk profile: {risk_profile}\n\nSimilar posts: {top_10_results[:3]}"
-    generated_explain_response = generate_output(LLM_MODEL, APPENDED_PROMPT_EXPLAIN, options={"temperature": 0.5})
+    options_explain = {
+        "temperature": 0.5,
+        "num_predict": 1024,
+        "num_ctx": 4096
+    }
+    generated_explain_response = generate_output(LLM_MODEL, APPENDED_PROMPT_EXPLAIN, options=options_explain)
     # print('2/2: Completed risk profile')
     
     print("\nSTART OF GENERATED RESPONSE: ")
@@ -85,7 +95,7 @@ def run_pipeline(query: str, is_verbose: bool = False, ignore_human_review: bool
     
     
     review_choice = None
-    if (risk_profile['human_review_required'] or confidence_score < 0.7) and not ignore_human_review:
+    if (risk_profile['human_review_required'] or confidence_score < 0.9) and not ignore_human_review:
         review_choice = input("""\nHigh risk - human review required (options: (c)onfirm, to override enter <(m)oderate/(l)ow>, (d)issmiss) 
                               enter 'c' to confirm high risk, 'm' to override to moderate, 'l' to override to low, or 'd' to dismiss as safe: """).strip().lower()
     if is_verbose:
@@ -106,5 +116,5 @@ def run_pipeline(query: str, is_verbose: bool = False, ignore_human_review: bool
         "risk_score": risk_profile['risk_score'],
         "severity": risk_profile['severity'],
         "confidence_score": confidence_score,
-        "review_choice": review_choice
+        "human_review_choice": review_choice
     }

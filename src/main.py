@@ -17,7 +17,7 @@ REPO_ROOT = CURRENT_DIR.parent
 OUTPUT_DIR = REPO_ROOT / "outputs"
 OUTPUT_FILE = str(OUTPUT_DIR / "output.csv")
 
-HEADERS = ["post_id", "post", "in_crisis", "risk_score", "severity", "confidence_score", "human_review_choice", "explanation"]
+HEADERS = ["post_id", "in_crisis", "risk_score", "severity", "confidence_score", "human_review_choice", "post", "explanation"]
 
 def init_output_csv():
     """Creates the outputs directory and initializes the CSV with headers (overwrites on each run)."""
