@@ -69,8 +69,8 @@ def run_pipeline(query: str, is_verbose: bool = False, ignore_human_review: bool
     
     confidence_score = scoring_engine.calculate_final_confidence_score(risk_profile, top_results)
     risk_profile["confidence_score"] = confidence_score
-    if risk_profile["confidence_score"] < 0.9:
-        risk_profile["human_review_required"] = True
+    #if risk_profile["confidence_score"] < 0.9 and risk_profile["severity"] != "low":
+    #    risk_profile["human_review_required"] = True
 
     print("2/2: Generating risk profile...")
     APPENDED_PROMPT_EXPLAIN = f"{PROMPT_EXPLAIN}\n\nPost to explain: {query}\n\nRisk profile: {risk_profile}\n\nSimilar posts: {top_results[:3]}"
